@@ -1,7 +1,6 @@
 from database import get_connection, init_db
 import os
 
-# Remove existing database to start fresh
 DB_PATH = os.path.join(os.path.dirname(__file__), "waste_management.db")
 if os.path.exists(DB_PATH):
     os.remove(DB_PATH)
@@ -10,7 +9,6 @@ init_db()
 conn = get_connection()
 cursor = conn.cursor()
 
-# Zones
 cursor.executemany(
     "INSERT INTO zones (name, area_code) VALUES (?, ?)",
     [
@@ -21,7 +19,6 @@ cursor.executemany(
     ],
 )
 
-# Vehicles
 cursor.executemany(
     "INSERT INTO vehicles (registration_number, capacity, status) VALUES (?, ?, ?)",
     [
@@ -32,7 +29,6 @@ cursor.executemany(
     ],
 )
 
-# Drivers
 cursor.executemany(
     "INSERT INTO drivers (name, phone) VALUES (?, ?)",
     [
@@ -42,7 +38,6 @@ cursor.executemany(
     ],
 )
 
-# Complaints
 cursor.executemany(
     "INSERT INTO complaints (zone_id, description) VALUES (?, ?)",
     [

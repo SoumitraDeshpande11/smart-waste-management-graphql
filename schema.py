@@ -2,8 +2,6 @@ import graphene
 from database import get_connection
 
 
-# ─── Object Types ────────────────────────────────────────────────────────────
-
 class ZoneType(graphene.ObjectType):
     id = graphene.Int(required=True)
     name = graphene.String(required=True)
@@ -130,8 +128,6 @@ class DisposalLogType(graphene.ObjectType):
         return None
 
 
-# ─── Input Types ─────────────────────────────────────────────────────────────
-
 class CreateScheduleInput(graphene.InputObjectType):
     zone_id = graphene.Int(required=True)
     vehicle_id = graphene.Int(required=True)
@@ -148,8 +144,6 @@ class CreateDisposalLogInput(graphene.InputObjectType):
     waste_quantity = graphene.Float(required=True)
     date = graphene.String(required=True)
 
-
-# ─── Queries ─────────────────────────────────────────────────────────────────
 
 class Query(graphene.ObjectType):
     zones = graphene.List(ZoneType)
@@ -285,8 +279,6 @@ class Query(graphene.ObjectType):
         ]
 
 
-# ─── Mutations ───────────────────────────────────────────────────────────────
-
 class CreateSchedule(graphene.Mutation):
     class Arguments:
         input = CreateScheduleInput(required=True)
@@ -296,13 +288,11 @@ class CreateSchedule(graphene.Mutation):
     def mutate(self, info, input):
         conn = get_connection()
 
-        # Check zone exists
         zone = conn.execute("SELECT * FROM zones WHERE id = ?", (input.zone_id,)).fetchone()
         if not zone:
             conn.close()
             raise Exception("Zone not found")
 
-        # Check vehicle exists and is available
         vehicle = conn.execute("SELECT * FROM vehicles WHERE id = ?", (input.vehicle_id,)).fetchone()
         if not vehicle:
             conn.close()
@@ -311,7 +301,6 @@ class CreateSchedule(graphene.Mutation):
             conn.close()
             raise Exception(f"Vehicle is not available (current status: {vehicle['status']})")
 
-        # Create schedule and mark vehicle as assigned
         cursor = conn.execute(
             "INSERT INTO collection_schedules (zone_id, vehicle_id, date, status) VALUES (?, ?, ?, 'planned')",
             (input.zone_id, input.vehicle_id, input.date)
@@ -352,7 +341,6 @@ class UpdateScheduleStatus(graphene.Mutation):
 
         conn.execute("UPDATE collection_schedules SET status = ? WHERE id = ?", (status, id))
 
-        # If completed, mark vehicle as available again
         if status == "completed":
             conn.execute("UPDATE vehicles SET status = 'available' WHERE id = ?", (schedule["vehicle_id"],))
 
