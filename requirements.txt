@@ -1,0 +1,2 @@
+graphene==3.4.3
+flask==3.1.3
